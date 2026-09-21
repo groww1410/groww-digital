@@ -1,27 +1,38 @@
 const menuButton = document.querySelector('.menu-button');
 const navLinks = document.querySelector('.nav-links');
-
 menuButton.addEventListener('click', () => {
   const open = navLinks.classList.toggle('is-open');
-  menuButton.setAttribute('aria-expanded', open);
+  menuButton.setAttribute('aria-expanded', String(open));
   menuButton.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
 });
-
-document.querySelectorAll('.nav-links a').forEach((link) => link.addEventListener('click', () => {
-  navLinks.classList.remove('is-open');
-  menuButton.setAttribute('aria-expanded', 'false');
-}));
+document.querySelectorAll('.nav-links a').forEach((link) => link.addEventListener('click', () => navLinks.classList.remove('is-open')));
 
 const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
   if (entry.isIntersecting) entry.target.classList.add('is-visible');
 }), { threshold: 0.12 });
 document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
 
-document.querySelector('#contact-form').addEventListener('submit', (event) => {
+const filters = document.querySelectorAll('.filter');
+const cards = document.querySelectorAll('.car-card');
+filters.forEach((filter) => filter.addEventListener('click', () => {
+  filters.forEach((item) => { item.classList.remove('active'); item.setAttribute('aria-selected', 'false'); });
+  filter.classList.add('active');
+  filter.setAttribute('aria-selected', 'true');
+  cards.forEach((card) => card.classList.toggle('is-hidden', filter.dataset.filter !== 'all' && !card.dataset.category.includes(filter.dataset.filter)));
+}));
+
+const dialog = document.querySelector('#car-dialog');
+const modelChoice = document.querySelector('#model-choice');
+document.querySelectorAll('.discover').forEach((button) => button.addEventListener('click', () => {
+  document.querySelector('#dialog-title').textContent = button.dataset.car;
+  modelChoice.value = button.dataset.car;
+  dialog.showModal();
+}));
+document.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
+dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+
+document.querySelector('#enquiry-form').addEventListener('submit', (event) => {
   event.preventDefault();
-  const form = new FormData(event.currentTarget);
-  const subject = encodeURIComponent(`WEBRO project enquiry from ${form.get('name')}`);
-  const body = encodeURIComponent(`Name: ${form.get('name')}\nEmail: ${form.get('email')}\nBusiness: ${form.get('business')}\n\n${form.get('message')}`);
-  document.querySelector('#form-note').textContent = 'Opening your email app with your project details…';
-  window.location.href = `mailto:hello@yourwebro.com?subject=${subject}&body=${body}`;
+  document.querySelector('#form-note').textContent = 'Thank you. A product expert will be in touch shortly.';
+  event.currentTarget.reset();
 });
